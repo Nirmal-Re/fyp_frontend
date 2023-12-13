@@ -1,15 +1,23 @@
-// import axios from "axios";
+import axios from "axios";
 
+import { isMicro, MONO_API_URL, MICRO_API_URL } from "./constants";
 
 // These functions aren't exaclty correct and need to be updated to work with the API
-// const fetchFromAPI = async (endpoint: string) => {
-//   const { data } = await axios.get(endpoint);
-//   return data;
-// };
+export const fetchFromAPI = async (endpoint: string) => {
+  const API_URL = isMicro ? MICRO_API_URL : MONO_API_URL;
+  const URL = `${API_URL}/${endpoint}`;
+  const { data } = await axios.get(URL, {
+    withCredentials: true,
+  });
+  return data;
+};
 
-// const postsToAPI = async (endpoint: string, data: any) => {
-//   const { data: post } = await axios.post(endpoint, data);
-//   return post;
-// }
-
-export {}
+export const postsToAPI = async (endpoint: string, data: any) => {
+  const API_URL = isMicro ? MICRO_API_URL : MONO_API_URL;
+  const URL = `${API_URL}/${endpoint}`;
+  console.log(URL);
+  const { data: post } = await axios.post(URL, data, {
+    withCredentials: true,
+  });
+  return post;
+};
