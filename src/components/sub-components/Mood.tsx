@@ -1,7 +1,16 @@
-const Mood = () => {
+import { Button } from "@mui/material";
+
+type propsType = {
+  props: {
+    mood: boolean;
+    hour: string;
+  };
+};
+
+const Mood = ({ props: { mood, hour } }: propsType) => {
   return (
     <div>
-      <h1>Mood</h1>
+      <Button variant="outlined"> {mood ? `${hour} 😀` : `${hour} 😔`} </Button>
     </div>
   );
 };

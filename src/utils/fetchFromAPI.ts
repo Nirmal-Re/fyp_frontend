@@ -6,6 +6,7 @@ import { isMicro, MONO_API_URL, MICRO_API_URL } from "./constants";
 export const fetchFromAPI = async (endpoint: string) => {
   const API_URL = isMicro ? MICRO_API_URL : MONO_API_URL;
   const URL = `${API_URL}/${endpoint}`;
+  console.log(URL);
   const { data } = await axios.get(URL, {
     withCredentials: true,
   });

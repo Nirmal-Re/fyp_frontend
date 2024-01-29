@@ -15,7 +15,7 @@ const Navbar = () => {
       .catch((err) => console.log(err));
   };
   return (
-    <AppBar sx={{ background: "#063970", position: "absolute" }}>
+    <AppBar sx={{ background: "#333333", position: "absolute" }}>
       <Toolbar>
         <Tabs
           textColor="inherit"
