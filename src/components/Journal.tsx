@@ -6,6 +6,7 @@ import { useState, useEffect } from "react";
 
 import { Mood } from "./sub-components";
 import { fetchFromAPI, postsToAPI } from "../utils/fetchFromAPI";
+import React from "react";
 
 //Log type declaration
 interface Log {
@@ -18,7 +19,7 @@ interface Log {
 const Journal = () => {
   const [log, setLog] = useState({} as Log);
   const [habit, setHabit] = useState("");
-  const [habbitAddedSucessfully, setHabbitAddedSucessfully] = useState(false);
+  const [changeSuccessful, setchangeSuccessful] = useState(false);
 
   useEffect(() => {
     fetchFromAPI("logs/get-daily-log")
@@ -27,15 +28,36 @@ const Journal = () => {
         console.log(result);
       })
       .catch((err) => console.error(err));
-  }, [habbitAddedSucessfully]);
+  }, [changeSuccessful]);
+
+  const handleLogChange = (e: React.MouseEvent<HTMLButtonElement>) => {
+    const key = e.currentTarget.value;
+    log[key] = !log[key];
+    const endPoint = "logs/add-daily-log";
+    postsToAPI(endPoint, log)
+      .then((result) => {
+        setchangeSuccessful(!changeSuccessful);
+      })
+      .catch((err) => console.error(err));
+  };
+
+  const handleMoodChange = (e: React.MouseEvent<HTMLButtonElement>) => {
+    const index = Number(e.currentTarget.value) as number;
+    log.moods[index] = !log.moods[index];
+    const endPoint = "logs/add-daily-log";
+    postsToAPI(endPoint, log)
+      .then((result) => {
+        setchangeSuccessful(!changeSuccessful);
+      })
+      .catch((err) => console.error(err));
+  };
 
   const handleAddHabit = () => {
     const endPoint = "logs/add-new-habits";
     const body = { newHabits: habit };
-    console.log(body);
     postsToAPI(endPoint, body)
       .then((result) => {
-        setHabbitAddedSucessfully(!habbitAddedSucessfully);
+        setchangeSuccessful(!changeSuccessful);
         setHabit("");
         console.log(result);
       })
@@ -70,8 +92,18 @@ const Journal = () => {
         {log.moods?.map((val, i) => {
           const currentHour = new Date(log.uploadDateAndTime).getHours();
           const hourString = (currentHour + i).toString().padEnd(5, ":00");
-          const moodAndHour = { mood: val, hour: hourString };
-          return <Mood props={moodAndHour} key={i} />;
+          return (
+            <Button
+              variant="outlined"
+              value={i}
+              onClick={(e: React.MouseEvent<HTMLButtonElement>) =>
+                handleMoodChange(e)
+              }
+            >
+              {val ? `${hourString} 😀` : `${hourString} 😔`}{" "}
+            </Button>
+          );
+          // return <Mood props={moodAndHour} key={i} />;
         })}
       </Box>
       {Object.entries(log).map(([key, value]) => {
@@ -103,7 +135,10 @@ const Journal = () => {
             <Button
               variant="outlined"
               size="large"
-              onClick={handleAddHabit}
+              value={key}
+              onClick={(e: React.MouseEvent<HTMLButtonElement>) =>
+                handleLogChange(e)
+              }
               sx={{ height: 40 }}
             >
               {value ? <DoneIcon /> : <CloseIcon />}
