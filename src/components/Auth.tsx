@@ -2,7 +2,7 @@ import { Box, Typography, TextField, Button } from "@mui/material";
 import { LoginOutlined, HowToRegOutlined } from "@mui/icons-material";
 import { FormEvent, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { postsToAPI } from "../utils/fetchFromAPI";
+import { postsToAPI } from "../utils/apiRequests";
 
 type AuthProps = {
   isSignupValue: boolean;

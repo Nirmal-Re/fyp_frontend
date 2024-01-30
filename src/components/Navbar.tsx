@@ -2,7 +2,7 @@ import { AppBar, Toolbar, Tabs, Tab, Button } from "@mui/material";
 import { Link, useNavigate } from "react-router-dom";
 import { Home } from "@mui/icons-material";
 import { useState } from "react";
-import { postsToAPI } from "../utils/fetchFromAPI";
+import { postsToAPI } from "../utils/apiRequests";
 
 const Navbar = () => {
   const [value, setValue] = useState();
@@ -25,7 +25,7 @@ const Navbar = () => {
         >
           <Tab icon={<Home />} component={Link} to="/dashboard" />
           <Tab label="Journal" component={Link} to="/journal" />
-          <Tab label="Report" component={Link} to="/report" />
+          <Tab label="Workouts" component={Link} to="/workouts" />
         </Tabs>
         <Button
           component={Link}

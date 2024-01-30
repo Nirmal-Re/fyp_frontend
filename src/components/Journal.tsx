@@ -3,9 +3,7 @@ import DoneIcon from "@mui/icons-material/Done";
 import CloseIcon from "@mui/icons-material/Close";
 // import { CloseIcon, DoneIcon } from "@mui/icons-material";
 import { useState, useEffect } from "react";
-
-import { Mood } from "./sub-components";
-import { fetchFromAPI, postsToAPI } from "../utils/fetchFromAPI";
+import { fetchFromAPI, postsToAPI } from "../utils/apiRequests";
 import React from "react";
 
 //Log type declaration
