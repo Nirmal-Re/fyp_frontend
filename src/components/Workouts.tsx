@@ -4,39 +4,42 @@ import {
   AccordionSummary,
   AccordionDetails,
   Typography,
-  List,
-  ListItem,
   Button,
+  Box,
   TextField,
-  IconButton,
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import DeleteIcon from "@mui/icons-material/Delete";
+import { useLocation } from "react-router-dom";
 
 import { Exercise } from "./sub-components";
 import { fetchFromAPI, postsToAPI } from "../utils/apiRequests";
-import { Handshake } from "@mui/icons-material";
 
-interface workoutDataType {
-  [key: string]: string[];
+interface exerciseDataType {
+  name: string;
+  sets: { reps: number; weight: number }[] | { reps: number; time: number }[];
 }
 
 const Workouts = () => {
-  const [workoutData, setWorkoutData] = useState<workoutDataType>(
-    {} as workoutDataType
-  );
+  const location = useLocation();
+  const workoutType = location.state?.type;
+  const [workoutData, setWorkoutData] = useState<string[]>([]);
   const [changeSuccessful, setchangeSuccessful] = useState(false);
   const [add, setAdd] = useState("");
   const [remove, setRemove] = useState("");
+  const [fullWorkout, setFullWorkout] = useState({
+    update: { type: workoutType, data: [] as exerciseDataType[] },
+  });
+
+  console.log({ workoutType });
 
   useEffect(() => {
     const endPoint = "exercise/get-workouts";
     fetchFromAPI(endPoint)
       .then((result) => {
-        setWorkoutData(result);
+        setWorkoutData(result[workoutType]);
       })
       .catch((err) => console.error(err));
-  }, [changeSuccessful]);
+  }, [workoutType, changeSuccessful]);
 
   const handleUpdate = (e: React.MouseEvent<HTMLButtonElement>) => {
     const type = e.currentTarget.value;
@@ -62,40 +65,63 @@ const Workouts = () => {
       })
       .catch((err) => console.error(err));
   };
+
+  const handleSave = ({ name, sets }: exerciseDataType) => {
+    fullWorkout.update.data.push({ name, sets });
+  };
+
+  const handleUpload = () => {
+    const endPoint = "exercise/add-workout-data";
+    fullWorkout.update.type = workoutType;
+    postsToAPI(endPoint, fullWorkout)
+      .then((result) => {
+        setFullWorkout({ update: { type: workoutType, data: [] } });
+        alert("Successfully uploaded workout data");
+      })
+      .catch((err) => {
+        alert(
+          "Error uploading workout data. Save the data an try uploading again"
+        );
+        console.error(err);
+      });
+  };
   return (
-    <div>
-      {Object.keys(workoutData).map((workoutType, index) => (
-        <Accordion key={index}>
-          <AccordionSummary
-            expandIcon={<ExpandMoreIcon />}
-            aria-controls={`panel${index}a-content`}
-            id={`panel${index}a-header`}
-          >
-            <Typography variant="h6">
-              {workoutType.charAt(0).toUpperCase() + workoutType.slice(1)}
-            </Typography>
-          </AccordionSummary>
-          <AccordionDetails>
-            {workoutData[workoutType].map((exercise, exerciseIndex) => (
-              <Accordion key={exerciseIndex} elevation={0}>
-                <AccordionSummary
-                  expandIcon={<ExpandMoreIcon />}
-                  aria-controls={`panel${index}a-content-${exerciseIndex}`}
-                  id={`panel${index}a-header-${exerciseIndex}`}
-                >
-                  <Typography variant="body1">{exercise}</Typography>
-                </AccordionSummary>
-                <AccordionDetails>
-                  <Exercise
-                    type={workoutType}
-                    exercise={exercise}
-                    handleDelete={(wt: string, exe: string) =>
-                      handleDelete(wt, exe)
-                    }
-                  />
-                </AccordionDetails>
-              </Accordion>
-            ))}
+    <>
+      <Accordion
+        key={workoutType}
+        expanded={true}
+        sx={{ border: "1px solid black" }}
+      >
+        <AccordionSummary
+          expandIcon={<ExpandMoreIcon />}
+          aria-controls={`panel${workoutType}a-content`}
+          id={`panel${workoutType}a-header`}
+        >
+          <Typography variant="h6">
+            {workoutType.charAt(0).toUpperCase() + workoutType.slice(1)}
+          </Typography>
+        </AccordionSummary>
+        <AccordionDetails>
+          {workoutData.map((exercise, exerciseIndex) => (
+            <Accordion key={exerciseIndex} elevation={0}>
+              <AccordionSummary
+                expandIcon={<ExpandMoreIcon />}
+                aria-controls={`panela-content-${exerciseIndex}`}
+                id={`panela-header-${exerciseIndex}`}
+              >
+                <Typography variant="body1">{exercise}</Typography>
+              </AccordionSummary>
+              <AccordionDetails>
+                <Exercise
+                  type={workoutType}
+                  exercise={exercise}
+                  handleDelete={() => handleDelete(workoutType, exercise)}
+                  handleSave={(arg) => handleSave(arg)}
+                />
+              </AccordionDetails>
+            </Accordion>
+          ))}
+          <Box>
             <div>
               <TextField
                 id="outlined-basic"
@@ -128,10 +154,17 @@ const Workouts = () => {
                 Add
               </Button>
             </div>
-          </AccordionDetails>
-        </Accordion>
-      ))}
-    </div>
+            <Button
+              variant="contained"
+              sx={{ marginTop: "10px" }}
+              onClick={handleUpload}
+            >
+              UPLOAD
+            </Button>
+          </Box>
+        </AccordionDetails>
+      </Accordion>
+    </>
   );
 };
 

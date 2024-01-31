@@ -18,45 +18,59 @@ interface propsType {
   exercise: string;
   type: string;
   handleDelete: (wt: string, exe: string) => void;
+  handleSave: (arg: {
+    name: string;
+    sets: { reps: number; weight: number }[] | { reps: number; time: number }[];
+  }) => void;
 }
 
-const Exercise = ({ type, exercise, handleDelete }: propsType) => {
-  const [sets, setSets] = useState([
-    { reps: 10, weight: 55 },
-    { reps: 10, weight: 55 },
-    { reps: 9, weight: 55 },
-    { reps: 7, weight: 52.5 },
-  ]);
-
+const Exercise = ({ type, exercise, handleDelete, handleSave }: propsType) => {
+  const [sets, setSets] = useState(
+    type === "cardio" ? [{ reps: 0, time: 0 }] : [{ reps: 0, weight: 0 }]
+  );
   const handleRepsChange = (index: number, value: number) => {
     const newSets = [...sets];
     newSets[index].reps = value;
-    setSets(newSets);
+    setSets(newSets as typeof sets);
   };
 
   const handleWeightChange = (index: number, value: number) => {
     const newSets = [...sets];
-    newSets[index].weight = value;
-    setSets(newSets);
+    if (type !== "cardio") {
+      (newSets[index] as { reps: number; weight: number }).weight = value;
+    } else {
+      (newSets[index] as { reps: number; time: number }).time = value;
+    }
+    setSets(newSets as typeof sets);
   };
 
   const addSet = () => {
-    setSets([...sets, { reps: 0, weight: 0 }]);
+    if (type !== "cardio") {
+      setSets([...sets, { weight: 0, reps: 0 }] as typeof sets);
+    } else {
+      setSets([...sets, { time: 0, reps: 0 }] as typeof sets);
+    }
   };
 
   const removeSet = (index: number) => {
     const newSets = [...sets];
     newSets.splice(index, 1);
-    setSets(newSets);
+    setSets(newSets as typeof sets);
+  };
+
+  const onSave = () => {
+    handleSave({ name: exercise, sets });
   };
 
   return (
-    <TableContainer component={Paper}>
+    <TableContainer component={Paper} sx={{ border: "2px solid black" }}>
       <Table>
         <TableHead>
           <TableRow>
             <TableCell>REPS</TableCell>
-            <TableCell>WEIGHT (kg)</TableCell>
+            <TableCell>
+              {type !== "cardio" ? "WEIGHT (kg)" : "TIME (mins)"}
+            </TableCell>
             <TableCell>ACTION</TableCell>
           </TableRow>
         </TableHead>
@@ -65,25 +79,52 @@ const Exercise = ({ type, exercise, handleDelete }: propsType) => {
             <TableRow key={index}>
               <TableCell>
                 <TextField
-                  value={set.reps}
-                  onChange={(e) =>
-                    handleRepsChange(index, Number(e.target.value))
-                  }
+                  // value={set.reps}
+                  onChange={(e) => {
+                    const value = Number(e.target.value);
+                    if (value >= 0) {
+                      handleRepsChange(index, value);
+                    } else {
+                      alert("Negative values are not allowed");
+                    }
+                  }}
                   type="number"
                   variant="outlined"
                   size="small"
+                  required
                 />
               </TableCell>
               <TableCell>
-                <TextField
-                  value={set.weight}
-                  onChange={(e) =>
-                    handleWeightChange(index, Number(e.target.value))
-                  }
-                  type="number"
-                  variant="outlined"
-                  size="small"
-                />
+                {"weight" in set && (
+                  <TextField
+                    onChange={(e) => {
+                      const value = Number(e.target.value);
+                      if (value >= 0) {
+                        handleWeightChange(index, value);
+                      } else {
+                        alert("Negative values are not allowed");
+                      }
+                    }}
+                    type="number"
+                    variant="outlined"
+                    size="small"
+                  />
+                )}
+                {"time" in set && (
+                  <TextField
+                    onChange={(e) => {
+                      const value = Number(e.target.value);
+                      if (value >= 0) {
+                        handleWeightChange(index, value);
+                      } else {
+                        alert("Negative values are not allowed");
+                      }
+                    }}
+                    type="number"
+                    variant="outlined"
+                    size="small"
+                  />
+                )}
               </TableCell>
               <TableCell>
                 <IconButton onClick={() => removeSet(index)}>
@@ -103,7 +144,7 @@ const Exercise = ({ type, exercise, handleDelete }: propsType) => {
         <Button onClick={addSet} variant="contained" color="primary">
           ADD SET
         </Button>
-        <Button variant="contained" color="primary">
+        <Button variant="contained" color="primary" onClick={() => onSave()}>
           SAVE
         </Button>
         <Button
