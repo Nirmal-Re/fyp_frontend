@@ -5,10 +5,13 @@ import { useNavigate } from "react-router-dom";
 import { postsToAPI } from "../utils/apiRequests";
 
 type AuthProps = {
-  isSignupValue: boolean;
+  props: {
+    isSignupValue: boolean;
+    handleLogin: () => void;
+  };
 };
 
-const Auth = ({ isSignupValue }: AuthProps) => {
+const Auth = ({ props: { isSignupValue, handleLogin } }: AuthProps) => {
   const [isSignup, setIsSignup] = useState(isSignupValue);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -31,11 +34,20 @@ const Auth = ({ isSignupValue }: AuthProps) => {
         password,
         firstName,
         lastName,
-      }).then((result) => console.log(result));
+      })
+        .then((result) => {
+          resetState();
+          navigate("/login");
+        })
+        .catch((err) => console.log(err));
     } else {
       // login
       await postsToAPI("auth/login", { email, password })
-        .then((result) => navigate("/dashboard", { state: result }))
+        .then((result) => {
+          resetState();
+          handleLogin();
+          navigate("/dashboard", { state: result });
+        })
         .catch((err) => console.log(err));
     }
   };
