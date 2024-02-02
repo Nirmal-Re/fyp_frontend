@@ -1,5 +1,13 @@
 import { Bar, Line } from "react-chartjs-2";
-import { Chart, LinearScale, CategoryScale, BarElement } from "chart.js";
+import {
+  Chart,
+  LinearScale,
+  CategoryScale,
+  BarElement,
+  ChartData,
+  ChartDataset,
+} from "chart.js";
+import { Typography } from "@mui/material";
 Chart.register(LinearScale, CategoryScale, BarElement);
 
 interface JournalGraphProps {
@@ -9,72 +17,78 @@ interface JournalGraphProps {
 }
 
 const JournalGraph = ({ props: { journalData } }: JournalGraphProps) => {
-  const data = {
+  const data: ChartData<"bar", number[], string> = {
     labels: journalData.uploadDateAndTime,
     datasets: [
       {
-        label: "journal",
+        label: "Done",
         data: journalData.noOfTrue,
-        backgroundColor: "rgba(75,192,192,0.4)",
+        backgroundColor: "lightblue",
         borderColor: "rgba(75,192,192,1)",
         borderWidth: 1,
-        // type: "bar" as const,
+        type: "bar" as const,
+        order: 1, // This will be drawn first
       },
       {
-        label: "noOfFalse",
+        label: "Not Done",
         data: journalData.noOfFalse,
-        babelColor: "rgba(60,192,192,0.4)",
+        backgroundColor: "lightgreen",
         borderColor: "rgba(75,192,192,1)",
         borderWidth: 1,
-        // type: "bar" as const,
+        type: "bar" as const,
+        order: 2, // This will be drawn second
       },
       {
-        label: "LineData",
+        label: "Good Moods",
         data: journalData.goodMoods,
-        backgroundColor: "rgba(75,192,192,0.4)",
-        borderColor: "rgba(75,192,192,1)",
+        backgroundColor: "green",
+        borderColor: "blue",
         borderWidth: 1,
-        // type: "line" as const,
+        type: "line" as const,
+        order: 3, // This will be drawn last
       },
-
       {
-        label: "LineData",
+        label: "Bad Moods",
         data: journalData.badMoods,
-        babelColor: "rgba(60,192,192,0.4)",
-        borderColor: "rgba(75,192,192,1)",
+        backgroundColor: "red",
+        borderColor: "red",
         borderWidth: 1,
-        // type: "line" as const,
+        type: "line" as const,
+        order: 4, // This will be drawn last
       },
-    ],
+    ] as ChartDataset<"bar", number[]>[],
   };
   const options = {
     scales: {
       y: {
         beginAtZero: true,
+        title: {
+          display: true,
+          text: "No of Entries",
+        },
+      },
+      x: {
+        title: {
+          display: true,
+          text: "Date And Time",
+        },
       },
     },
     plugins: {
       legend: {
-        labels: {
-          generateLabels: (chart) => {
-            // Get default labels
-            const labels =
-              Chart.overrides.bar.plugins.legend.labels.generateLabels(chart);
-
-            // Override type for line datasets
-            labels.forEach((label) => {
-              if (label.datasetIndex === 2 || label.datasetIndex === 3) {
-                label.type = "line";
-              }
-            });
-
-            return labels;
-          },
-        },
+        display: true,
+      },
+      tooltip: {
+        enabled: true,
       },
     },
   };
-  return <Bar data={data} options={options} />;
+  return (
+    <div style={{ padding: "20px" }}>
+      <Typography variant="h4">{"JOURNAL GRAPH".toUpperCase()} </Typography>
+      <Bar data={data} options={options} />
+    </div>
+  );
 };
 
 export default JournalGraph;

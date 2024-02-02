@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from "react";
 
 import { postsToAPI } from "../utils/apiRequests";
 import { JournalGraph, WorkoutGraph } from "./sub-components";
-
+import { Box } from "@mui/material";
 const Dashboard = () => {
   const [exerciseData, setExerciseData] = useState({});
   const [journalData, setJournalData] = useState({});
@@ -37,10 +37,18 @@ const Dashboard = () => {
   }, [lastSevenDays]);
 
   return (
-    <>
+    <Box
+      display="flex"
+      flexDirection="column"
+      sx={{
+        width: "80%",
+        margin: "auto",
+        marginTop: "100px",
+      }}
+    >
       <JournalGraph props={{ journalData }} />
       <WorkoutGraph props={{ exerciseData }} />
-    </>
+    </Box>
   );
 };
 

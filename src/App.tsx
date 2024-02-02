@@ -35,7 +35,7 @@ function App() {
     setisLoggedIn(true);
   };
 
-  const handleLogout = () => {
+  const handleLogoutParent = () => {
     setisLoggedIn(false);
   };
 
@@ -44,7 +44,7 @@ function App() {
   return (
     <div className="App">
       <Router>
-        <Navbar props={{ isLoggedIn, handleLogout }} />
+        <Navbar props={{ isLoggedIn, handleLogoutParent }} />
         <div style={{ marginTop: "64px" }} />
         <Routes>
           <Route

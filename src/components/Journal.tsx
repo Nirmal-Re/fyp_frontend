@@ -63,18 +63,6 @@ const Journal = () => {
   };
   return (
     <div className="habitsPage">
-      {/* <CardMedia
-        component="img"
-        alt="Banner"
-        width="100%"
-        image="/images/banner.png"
-        sx={{
-          maxWidth: "100%", // Make sure it doesn't exceed the container width
-          height: "140px", // Fix the height as you have it
-          objectFit: "cover",
-          objectPosition: "none",
-        }}
-      /> */}
       <Box
         className="moods"
         display="flex"
@@ -88,17 +76,32 @@ const Journal = () => {
         }}
       >
         {log.moods?.map((val, i) => {
-          const currentHour = new Date(log.uploadDateAndTime).getHours();
-          const hourString = (currentHour + i).toString().padEnd(5, ":00");
+          const logGeneratedHour = new Date(log.uploadDateAndTime).getHours();
+          const hourString = (logGeneratedHour + i)
+            .toString()
+            .padEnd(5, ":000");
           return (
             <Button
               variant="outlined"
               value={i}
-              onClick={(e: React.MouseEvent<HTMLButtonElement>) =>
-                handleMoodChange(e)
-              }
+              onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
+                if (
+                  hourString >
+                  new Date().getHours().toString().padEnd(5, ":000")
+                ) {
+                  alert(
+                    "You can only change the mood for the past or current."
+                  );
+                } else {
+                  handleMoodChange(e);
+                }
+              }}
             >
-              {val ? `${hourString} 😀` : `${hourString} 😔`}{" "}
+              {val === null
+                ? `${hourString} 😐`
+                : val
+                ? `${hourString} 😀`
+                : `${hourString} 😔`}
             </Button>
           );
           // return <Mood props={moodAndHour} key={i} />;

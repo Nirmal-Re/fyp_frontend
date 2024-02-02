@@ -10,7 +10,6 @@ interface WorkoutGraphProps {
 const WorkoutGraph = ({ props: { exerciseData } }: WorkoutGraphProps) => {
   return (
     <Box>
-      <h1>Workout Graph</h1>
       {Object.entries(exerciseData).map(([key, value]) => {
         return <LineGraph key={key} title={key} plotData={value} />;
       })}

@@ -18,10 +18,10 @@ import { postsToAPI, fetchFromAPI } from "../utils/apiRequests";
 interface NavbarProps {
   props: {
     isLoggedIn: boolean;
-    handleLogout: () => void;
+    handleLogoutParent: () => void;
   };
 }
-const Navbar = ({ props: { isLoggedIn } }: NavbarProps) => {
+const Navbar = ({ props: { isLoggedIn, handleLogoutParent } }: NavbarProps) => {
   const [isAuthenticated, setIsAuthenticated] = useState(isLoggedIn);
   const [hasLogout, setHasLogout] = useState(false);
   const [workoutTypes, setWorkoutTypes] = useState<string[]>([]);
@@ -86,7 +86,7 @@ const Navbar = ({ props: { isLoggedIn } }: NavbarProps) => {
     postsToAPI("auth/logout", { withCredentials: true })
       .then((result) => {
         setHasLogout(!hasLogout);
-        handleLogout();
+        handleLogoutParent();
         navigate("/login", { state: result });
       })
       .catch((err) => console.log(err));
