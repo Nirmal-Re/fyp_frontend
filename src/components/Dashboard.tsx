@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 
 import { postsToAPI } from "../utils/apiRequests";
-import { JournalGraph } from "./sub-components";
+import { JournalGraph, WorkoutGraph } from "./sub-components";
 
 const Dashboard = () => {
   const [exerciseData, setExerciseData] = useState({});
@@ -39,6 +39,7 @@ const Dashboard = () => {
   return (
     <>
       <JournalGraph props={{ journalData }} />
+      <WorkoutGraph props={{ exerciseData }} />
     </>
   );
 };

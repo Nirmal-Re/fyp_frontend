@@ -90,7 +90,7 @@ const Workouts = () => {
       <Accordion
         key={workoutType}
         expanded={true}
-        sx={{ border: "1px solid black" }}
+        sx={{ border: "1px solid black", backgroundColor: "inherit" }}
       >
         <AccordionSummary
           expandIcon={<ExpandMoreIcon />}
@@ -121,7 +121,7 @@ const Workouts = () => {
               </AccordionDetails>
             </Accordion>
           ))}
-          <Box>
+          <Box sx={{ padding: 2 }}>
             <div>
               <TextField
                 id="outlined-basic"
