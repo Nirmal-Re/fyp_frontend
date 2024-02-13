@@ -1,25 +1,26 @@
 import React, { useState, useEffect, useCallback } from "react";
+import { Box } from "@mui/material";
 
 import { postsToAPI } from "../utils/apiRequests";
-import { JournalGraph, WorkoutGraph } from "./sub-components";
-import { Box } from "@mui/material";
+import { JournalGraph, WorkoutGraph, DateRangePicker } from "./sub-components";
 const Dashboard = () => {
-  const [exerciseData, setExerciseData] = useState({});
-  const [journalData, setJournalData] = useState({});
-
-  const formatDate = (date: Date) => {
-    return date.toISOString().slice(0, 19).replace("T", " ");
-  };
-  const lastSevenDays = useCallback(() => {
+  const lastSevenDays = () => {
     const today = new Date();
     const sevenDaysAgo = new Date();
     sevenDaysAgo.setDate(today.getDate() - 7);
     return [formatDate(sevenDaysAgo), formatDate(today)];
-  }, []);
+  };
+  const formatDate = (date: Date) => {
+    return date.toISOString().slice(0, 19).replace("T", " ");
+  };
+
+  const [dateRange, setDateRange] = useState(lastSevenDays()); // [start, end
+  const [exerciseData, setExerciseData] = useState({});
+  const [journalData, setJournalData] = useState({});
 
   useEffect(() => {
     const journalEndPoint = "dashboard/get-user-report-data";
-    const [start, end] = lastSevenDays();
+    const [start, end] = dateRange;
     postsToAPI(journalEndPoint, { start, end })
       .then((result) => {
         console.log(result);
@@ -34,7 +35,12 @@ const Dashboard = () => {
         setExerciseData(result);
       })
       .catch((err) => console.error(err));
-  }, [lastSevenDays]);
+  }, [dateRange]);
+
+  const onDateChange = (date: string[]) => {
+    console.log(date);
+    setDateRange(date);
+  };
 
   return (
     <Box
@@ -46,6 +52,9 @@ const Dashboard = () => {
         marginTop: "100px",
       }}
     >
+      <DateRangePicker
+        onDateChange={(passedDates) => onDateChange(passedDates)}
+      />
       <JournalGraph props={{ journalData }} />
       <WorkoutGraph props={{ exerciseData }} />
     </Box>

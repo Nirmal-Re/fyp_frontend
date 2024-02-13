@@ -17,8 +17,19 @@ interface JournalGraphProps {
 }
 
 const JournalGraph = ({ props: { journalData } }: JournalGraphProps) => {
+  if (!journalData?.uploadDateAndTime) {
+    return <div></div>;
+  }
   const data: ChartData<"bar", number[], string> = {
-    labels: journalData.uploadDateAndTime,
+    labels: journalData.uploadDateAndTime.map((dateStr: string) => {
+      const date = new Date(dateStr);
+      return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(
+        2,
+        "0"
+      )}-${String(date.getDate()).padStart(2, "0")} ${String(
+        date.getHours()
+      ).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`;
+    }),
     datasets: [
       {
         label: "Done",

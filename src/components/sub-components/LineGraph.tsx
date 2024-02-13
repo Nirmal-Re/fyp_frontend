@@ -26,6 +26,9 @@ interface LineGraphProps {
 }
 
 const LineGraph = ({ title, plotData }: LineGraphProps) => {
+  if (!plotData?.uploadDateAndTime) {
+    return <div></div>;
+  }
   const data = {
     labels: plotData.uploadDateAndTime.map((dateStr: string) => {
       const date = new Date(dateStr);
