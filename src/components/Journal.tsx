@@ -6,6 +6,8 @@ import { useState, useEffect } from "react";
 import { fetchFromAPI, postsToAPI } from "../utils/apiRequests";
 import React from "react";
 
+import { SimpleSelect } from "./sub-components";
+
 //Log type declaration
 interface Log {
   uid: number;
@@ -18,6 +20,7 @@ const Journal = () => {
   const [log, setLog] = useState({} as Log);
   const [habit, setHabit] = useState("");
   const [changeSuccessful, setchangeSuccessful] = useState(false);
+  const [ids, setIds] = useState([]);
 
   useEffect(() => {
     fetchFromAPI("logs/get-daily-log")
@@ -26,12 +29,19 @@ const Journal = () => {
         console.log(result);
       })
       .catch((err) => console.error(err));
+
+    fetchFromAPI("logs/get-log-ids")
+      .then((result) => {
+        setIds(result);
+        console.log(result);
+      })
+      .catch((err) => console.error(err));
   }, [changeSuccessful]);
 
   const handleLogChange = (e: React.MouseEvent<HTMLButtonElement>) => {
     const key = e.currentTarget.value;
     log[key] = !log[key];
-    const endPoint = "logs/add-daily-log";
+    const endPoint = "logs/update-log";
     postsToAPI(endPoint, log)
       .then((result) => {
         setchangeSuccessful(!changeSuccessful);
@@ -42,7 +52,7 @@ const Journal = () => {
   const handleMoodChange = (e: React.MouseEvent<HTMLButtonElement>) => {
     const index = Number(e.currentTarget.value) as number;
     log.moods[index] = !log.moods[index];
-    const endPoint = "logs/add-daily-log";
+    const endPoint = "logs/update-log";
     postsToAPI(endPoint, log)
       .then((result) => {
         setchangeSuccessful(!changeSuccessful);
@@ -60,6 +70,12 @@ const Journal = () => {
         console.log(result);
       })
       .catch((err) => console.error(err));
+  };
+
+  const handleChoice = (value: string) => {
+    fetchFromAPI(`logs/get-log-by-id/${value}`).then((result) => {
+      setLog(result);
+    });
   };
   return (
     <div className="habitsPage">
@@ -82,6 +98,7 @@ const Journal = () => {
             .padEnd(5, ":000");
           return (
             <Button
+              key={i}
               variant="outlined"
               value={i}
               onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
@@ -107,6 +124,10 @@ const Journal = () => {
           // return <Mood props={moodAndHour} key={i} />;
         })}
       </Box>
+      <SimpleSelect
+        data={ids}
+        handleChoice={(value: string) => handleChoice(value)}
+      />
       {Object.entries(log).map(([key, value]) => {
         if (
           key === "uploadDateAndTime" ||

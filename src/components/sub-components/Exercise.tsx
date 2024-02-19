@@ -17,6 +17,10 @@ import DeleteIcon from "@mui/icons-material/Delete";
 interface propsType {
   exercise: string;
   type: string;
+  setsForExercise:
+    | { reps: number; weight: number }[]
+    | { reps: number; time: number }[]
+    | [];
   handleDelete: (wt: string, exe: string) => void;
   handleSave: (arg: {
     name: string;
@@ -24,9 +28,19 @@ interface propsType {
   }) => void;
 }
 
-const Exercise = ({ type, exercise, handleDelete, handleSave }: propsType) => {
+const Exercise = ({
+  type,
+  exercise,
+  setsForExercise,
+  handleDelete,
+  handleSave,
+}: propsType) => {
   const [sets, setSets] = useState(
-    type === "cardio" ? [{ reps: 0, time: 0 }] : [{ reps: 0, weight: 0 }]
+    setsForExercise.length === 0
+      ? type === "cardio"
+        ? [{ reps: 0, time: 0 }]
+        : [{ reps: 0, weight: 0 }]
+      : setsForExercise
   );
   const handleRepsChange = (index: number, value: number) => {
     const newSets = [...sets];
@@ -62,6 +76,7 @@ const Exercise = ({ type, exercise, handleDelete, handleSave }: propsType) => {
     handleSave({ name: exercise, sets });
   };
 
+  console.log(setsForExercise);
   return (
     <TableContainer component={Paper} sx={{ border: "2px solid black" }}>
       <Table>
@@ -79,7 +94,7 @@ const Exercise = ({ type, exercise, handleDelete, handleSave }: propsType) => {
             <TableRow key={index}>
               <TableCell>
                 <TextField
-                  // value={set.reps}
+                  value={set.reps}
                   onChange={(e) => {
                     const value = Number(e.target.value);
                     if (value >= 0) {
@@ -97,6 +112,7 @@ const Exercise = ({ type, exercise, handleDelete, handleSave }: propsType) => {
               <TableCell>
                 {"weight" in set && (
                   <TextField
+                    value={set.weight}
                     onChange={(e) => {
                       const value = Number(e.target.value);
                       if (value >= 0) {
@@ -112,6 +128,7 @@ const Exercise = ({ type, exercise, handleDelete, handleSave }: propsType) => {
                 )}
                 {"time" in set && (
                   <TextField
+                    value={set["time"]}
                     onChange={(e) => {
                       const value = Number(e.target.value);
                       if (value >= 0) {
