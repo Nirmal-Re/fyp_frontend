@@ -22,7 +22,7 @@ interface exerciseDataType {
 const Workouts = () => {
   const location = useLocation();
   const workoutType = location.state?.type;
-  const [workoutData, setWorkoutData] = useState<string[]>([]);
+  // const [workoutData, setWorkoutData] = useState<string[]>([]);
   const [changeSuccessful, setchangeSuccessful] = useState(false);
   const [add, setAdd] = useState("");
   const [remove, setRemove] = useState("");
@@ -38,7 +38,17 @@ const Workouts = () => {
     const endPoint = "exercise/get-workouts";
     fetchFromAPI(endPoint)
       .then((result) => {
-        setWorkoutData(result[workoutType]);
+        const tempData = {
+          update: { type: workoutType, data: [] as exerciseDataType[] },
+        };
+        result[workoutType].forEach((exercise: string) => {
+          tempData.update.data.push({
+            name: exercise,
+            sets: [],
+          });
+        });
+        setFullWorkout(tempData);
+        console.log(tempData);
         setTypeOfPage("upload");
       })
       .catch((err) => console.error(err));
@@ -75,16 +85,18 @@ const Workouts = () => {
       .catch((err) => console.error(err));
   };
 
-  const handleSave = ({ name, sets }: exerciseDataType) => {
-    fullWorkout.update.data.push({ name, sets });
+  const handleSave = (index: number, { name, sets }: exerciseDataType) => {
+    console.log({ name, sets });
+    fullWorkout.update.data[index] = { name, sets };
   };
 
   const handleUpload = () => {
     const endPoint = "exercise/add-workout-data";
     fullWorkout.update.type = workoutType;
+    console.log(fullWorkout);
     postsToAPI(endPoint, fullWorkout)
       .then((result) => {
-        setFullWorkout({ update: { type: workoutType, data: [] } });
+        // setFullWorkout({ update: { type: workoutType, data: [] } });
         alert("Successfully uploaded workout data");
       })
       .catch((err) => {
@@ -101,6 +113,7 @@ const Workouts = () => {
     fetchFromAPI(`exercise/get-workout-by-id/${value}`)
       .then((result) => {
         const newFullWorkout = { update: result };
+        console.log(newFullWorkout);
         setFullWorkout(newFullWorkout);
         setTypeOfPage("update");
       })
@@ -112,171 +125,87 @@ const Workouts = () => {
     <>
       <SimpleSelect data={ids} handleChoice={handleChoice} />
       <>
-        {typeOfPage === "update" ? (
-          <>
-            <Accordion
-              key={workoutType}
-              expanded={true}
-              sx={{ border: "1px solid black", backgroundColor: "inherit" }}
-            >
-              <AccordionSummary
-                expandIcon={<ExpandMoreIcon />}
-                aria-controls={`panel${workoutType}a-content`}
-                id={`panel${workoutType}a-header`}
+        <Accordion
+          key={workoutType}
+          expanded={true}
+          sx={{ border: "1px solid black", backgroundColor: "inherit" }}
+        >
+          <AccordionSummary
+            expandIcon={<ExpandMoreIcon />}
+            aria-controls={`panel${workoutType}a-content`}
+            id={`panel${workoutType}a-header`}
+          >
+            <Typography variant="h6">
+              {workoutType.charAt(0).toUpperCase() + workoutType.slice(1)}
+            </Typography>
+          </AccordionSummary>
+          <AccordionDetails>
+            {fullWorkout.update.data.map((exercise, exerciseIndex) => (
+              <Accordion key={exerciseIndex} elevation={0}>
+                <AccordionSummary
+                  expandIcon={<ExpandMoreIcon />}
+                  aria-controls={`panela-content-${exerciseIndex}`}
+                  id={`panela-header-${exerciseIndex}`}
+                >
+                  <Typography variant="body1">{exercise.name}</Typography>
+                </AccordionSummary>
+                <AccordionDetails>
+                  <Exercise
+                    type={workoutType}
+                    exerciseIndex={exerciseIndex}
+                    exercise={exercise.name}
+                    setsForExercise={exercise.sets}
+                    handleDelete={() =>
+                      handleDelete(workoutType, exercise.name)
+                    }
+                    handleSave={(index, arg) => handleSave(index, arg)}
+                  />
+                </AccordionDetails>
+              </Accordion>
+            ))}
+            <Box sx={{ padding: 2 }}>
+              <div>
+                <TextField
+                  id="outlined-basic"
+                  label="Exercise"
+                  variant="outlined"
+                  placeholder="Exercise"
+                  value={add}
+                  // size="medium"
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    setAdd(e.target.value)
+                  }
+                  sx={{
+                    height: 40,
+                    "& .MuiOutlinedInput-root": {
+                      height: "100%",
+                      padding: "0px",
+                    },
+                    "& .MuiOutlinedInput-input": {
+                      padding: "10px",
+                    },
+                  }}
+                />
+                <Button
+                  variant="outlined"
+                  value={workoutType}
+                  size="large"
+                  onClick={handleUpdate}
+                  sx={{ height: 40 }}
+                >
+                  Add
+                </Button>
+              </div>
+              <Button
+                variant="contained"
+                sx={{ marginTop: "10px" }}
+                onClick={handleUpload}
               >
-                <Typography variant="h6">
-                  {workoutType.charAt(0).toUpperCase() + workoutType.slice(1)}
-                </Typography>
-              </AccordionSummary>
-              <AccordionDetails>
-                {fullWorkout.update.data.map((exercise, exerciseIndex) => (
-                  <Accordion key={exerciseIndex} elevation={0}>
-                    <AccordionSummary
-                      expandIcon={<ExpandMoreIcon />}
-                      aria-controls={`panela-content-${exerciseIndex}`}
-                      id={`panela-header-${exerciseIndex}`}
-                    >
-                      <Typography variant="body1">{exercise.name}</Typography>
-                    </AccordionSummary>
-                    <AccordionDetails>
-                      <Exercise
-                        type={workoutType}
-                        exercise={exercise.name}
-                        setsForExercise={exercise.sets}
-                        handleDelete={() =>
-                          handleDelete(workoutType, exercise.name)
-                        }
-                        handleSave={(arg) => handleSave(arg)}
-                      />
-                    </AccordionDetails>
-                  </Accordion>
-                ))}
-                <Box sx={{ padding: 2 }}>
-                  <div>
-                    <TextField
-                      id="outlined-basic"
-                      label="Exercise"
-                      variant="outlined"
-                      placeholder="Exercise"
-                      value={add}
-                      // size="medium"
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                        setAdd(e.target.value)
-                      }
-                      sx={{
-                        height: 40,
-                        "& .MuiOutlinedInput-root": {
-                          height: "100%",
-                          padding: "0px",
-                        },
-                        "& .MuiOutlinedInput-input": {
-                          padding: "10px",
-                        },
-                      }}
-                    />
-                    <Button
-                      variant="outlined"
-                      value={workoutType}
-                      size="large"
-                      onClick={handleUpdate}
-                      sx={{ height: 40 }}
-                    >
-                      Add
-                    </Button>
-                  </div>
-                  <Button
-                    variant="contained"
-                    sx={{ marginTop: "10px" }}
-                    onClick={handleUpload}
-                  >
-                    UPLOAD
-                  </Button>
-                </Box>
-              </AccordionDetails>
-            </Accordion>{" "}
-          </>
-        ) : (
-          <>
-            <Accordion
-              key={workoutType}
-              expanded={true}
-              sx={{ border: "1px solid black", backgroundColor: "inherit" }}
-            >
-              <AccordionSummary
-                expandIcon={<ExpandMoreIcon />}
-                aria-controls={`panel${workoutType}a-content`}
-                id={`panel${workoutType}a-header`}
-              >
-                <Typography variant="h6">
-                  {workoutType.charAt(0).toUpperCase() + workoutType.slice(1)}
-                </Typography>
-              </AccordionSummary>
-              <AccordionDetails>
-                {workoutData.map((exercise, exerciseIndex) => (
-                  <Accordion key={exerciseIndex} elevation={0}>
-                    <AccordionSummary
-                      expandIcon={<ExpandMoreIcon />}
-                      aria-controls={`panela-content-${exerciseIndex}`}
-                      id={`panela-header-${exerciseIndex}`}
-                    >
-                      <Typography variant="body1">{exercise}</Typography>
-                    </AccordionSummary>
-                    <AccordionDetails>
-                      <Exercise
-                        type={workoutType}
-                        exercise={exercise}
-                        setsForExercise={[]}
-                        handleDelete={() => handleDelete(workoutType, exercise)}
-                        handleSave={(arg) => handleSave(arg)}
-                      />
-                    </AccordionDetails>
-                  </Accordion>
-                ))}
-                <Box sx={{ padding: 2 }}>
-                  <div>
-                    <TextField
-                      id="outlined-basic"
-                      label="Exercise"
-                      variant="outlined"
-                      placeholder="Exercise"
-                      value={add}
-                      // size="medium"
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                        setAdd(e.target.value)
-                      }
-                      sx={{
-                        height: 40,
-                        "& .MuiOutlinedInput-root": {
-                          height: "100%",
-                          padding: "0px",
-                        },
-                        "& .MuiOutlinedInput-input": {
-                          padding: "10px",
-                        },
-                      }}
-                    />
-                    <Button
-                      variant="outlined"
-                      value={workoutType}
-                      size="large"
-                      onClick={handleUpdate}
-                      sx={{ height: 40 }}
-                    >
-                      Add
-                    </Button>
-                  </div>
-                  <Button
-                    variant="contained"
-                    sx={{ marginTop: "10px" }}
-                    onClick={handleUpload}
-                  >
-                    UPLOAD
-                  </Button>
-                </Box>
-              </AccordionDetails>
-            </Accordion>{" "}
-          </>
-        )}
+                {typeOfPage}
+              </Button>
+            </Box>
+          </AccordionDetails>
+        </Accordion>
       </>
     </>
   );

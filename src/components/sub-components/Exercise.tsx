@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Table,
   TableBody,
@@ -16,21 +16,28 @@ import DeleteIcon from "@mui/icons-material/Delete";
 
 interface propsType {
   exercise: string;
+  exerciseIndex: number;
   type: string;
   setsForExercise:
     | { reps: number; weight: number }[]
     | { reps: number; time: number }[]
     | [];
   handleDelete: (wt: string, exe: string) => void;
-  handleSave: (arg: {
-    name: string;
-    sets: { reps: number; weight: number }[] | { reps: number; time: number }[];
-  }) => void;
+  handleSave: (
+    index: number,
+    arg: {
+      name: string;
+      sets:
+        | { reps: number; weight: number }[]
+        | { reps: number; time: number }[];
+    }
+  ) => void;
 }
 
 const Exercise = ({
   type,
   exercise,
+  exerciseIndex,
   setsForExercise,
   handleDelete,
   handleSave,
@@ -69,14 +76,24 @@ const Exercise = ({
   const removeSet = (index: number) => {
     const newSets = [...sets];
     newSets.splice(index, 1);
+
     setSets(newSets as typeof sets);
   };
 
-  const onSave = () => {
-    handleSave({ name: exercise, sets });
-  };
+  useEffect(() => {
+    setSets(
+      setsForExercise.length === 0
+        ? type === "cardio"
+          ? [{ reps: 0, time: 0 }]
+          : [{ reps: 0, weight: 0 }]
+        : setsForExercise
+    );
+  }, [setsForExercise, type]);
 
-  console.log(setsForExercise);
+  useEffect(() => {
+    handleSave(exerciseIndex, { name: exercise, sets });
+  }, [sets, exercise, handleSave, exerciseIndex]);
+
   return (
     <TableContainer component={Paper} sx={{ border: "2px solid black" }}>
       <Table>
@@ -160,9 +177,6 @@ const Exercise = ({
       >
         <Button onClick={addSet} variant="contained" color="primary">
           ADD SET
-        </Button>
-        <Button variant="contained" color="primary" onClick={() => onSave()}>
-          SAVE
         </Button>
         <Button
           variant="contained"
