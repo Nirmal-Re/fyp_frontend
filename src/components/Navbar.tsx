@@ -74,7 +74,7 @@ const Navbar = ({ props: { isLoggedIn, handleLogoutParent } }: NavbarProps) => {
     fetchFromAPI(notificationEndPoint)
       .then((result) => {
         // console.log({ result });
-        setNotification(result.notifications);
+        setNotification(result.notifications.notifications);
       })
       .catch((err) => {
         console.error(err);
